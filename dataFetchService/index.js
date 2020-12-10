@@ -17,19 +17,25 @@ app.listen(port, () => {
   console.log('Service listening on port', port)
 })
 
+/**
+ * Test route for health checks
+ */
 app.get('/', (req, res) => {
   console.log('Hello world received a request.')
   res.send(`Hello World!`)
 })
 
 
-let sendDataToEncrypt = (dataString, cryptoKey, blockIndex, jobId) => {
+/**
+ * Function triggers a Encrypt call and returns a Promise
+ * @param {string} dataString Data to send to encrypt service
+ * @param {string} cryptoKey The encryption Key
+ */
+let sendDataToEncrypt = (dataString, cryptoKey) => {
     return new Promise((resolve, reject) => {
         let data = {
             "message": dataString,
-            "key": cryptoKey,
-            "blockIndex": blockIndex,
-            "jobId": jobId
+            "key": cryptoKey
             }
         let options = {
             url: "http://cryptoservice/encrypt",
@@ -56,6 +62,12 @@ let sendDataToEncrypt = (dataString, cryptoKey, blockIndex, jobId) => {
     })
 }
 
+
+/**
+ * Function triggers a decrypt call and returns a Promise
+ * @param {string} dataString Data to send to decrypt service
+ * @param {string} cryptoKey The decryption Key
+ */
 let sendDataToDecrypt = (dataString, cryptoKey) => {
     return new Promise((resolve, reject) => {
         let data = {
@@ -87,17 +99,20 @@ let sendDataToDecrypt = (dataString, cryptoKey) => {
     })
 }
 
+
+/**
+ * Route to fetch data from a URL and initiate the Encryption flows
+ * Responds to the user with the ciphertext and Job ID
+ */
 app.post('/fetchFromURL', async (req, res) => {
     let ebookUrl = req.body.ebookUrl
     let cryptoKey = req.body.cryptoKey
-    let blockIndex = 0
     let jobId = uuidv4()
     let cipherPromises = []
     request.get(ebookUrl).on("data", (data) => {
         console.log("Got data of size : " + data.length)
         let dataString = data.toString()
-        cipherPromises.push(sendDataToEncrypt(dataString, cryptoKey, blockIndex, jobId))
-        blockIndex += 1
+        cipherPromises.push(sendDataToEncrypt(dataString, cryptoKey))
     }).on("error", (error) => {
         console.error("eBook GET error: "+ error.message)
         res.status(500).send(error.message)
@@ -113,6 +128,10 @@ app.post('/fetchFromURL', async (req, res) => {
     })
 })
 
+/**
+ * Route to fetch data from a URL and initiate the Decryption flows
+ * Responds to the user with the plaintext and Job ID
+ */
 app.post('/fetchFromURLDecrypt', async (req, res) => {
     let ebookUrl = req.body.ebookUrl
     let cryptoKey = req.body.cryptoKey

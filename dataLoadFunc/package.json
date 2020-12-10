@@ -1,7 +1,7 @@
 {
   "name": "dataloadfunc",
   "version": "1.0.0",
-  "description": "This function is used to cache results in GCloud datastore",
+  "description": "This function is used to cache results in GCS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
