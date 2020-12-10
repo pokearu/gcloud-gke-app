@@ -1,0 +1,24 @@
+# This file configures the app which serves public web traffic.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cryptoservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cryptoservice
+  template:
+    metadata:
+      labels:
+        app: cryptoservice
+    spec:
+      containers:
+      - name: cryptoservice-app
+        image: gcr.io/aravind-ramalingam/cryptoservice:latest
+        # This app listens on port 8080 for web traffic by default.
+        ports:
+        - containerPort: 8080
+        env:
+          - name: PORT
+            value: "8080"

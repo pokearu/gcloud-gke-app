@@ -1,0 +1,23 @@
+{
+  "name": "dataloadfunc",
+  "version": "1.0.0",
+  "description": "This function is used to cache results in GCloud datastore",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pokearu/gcloud-gke-app.git"
+  },
+  "author": "Aravind Ramalingam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pokearu/gcloud-gke-app/issues"
+  },
+  "homepage": "https://github.com/pokearu/gcloud-gke-app#readme",
+  "dependencies": {
+    "@google-cloud/functions-framework": "^1.7.1",
+    "@google-cloud/storage": "^5.6.0"
+  }
+}

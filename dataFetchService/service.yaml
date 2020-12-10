@@ -1,0 +1,13 @@
+# The service provides a load-balancing proxy over the App pods. 
+# create an external HTTP load balancer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: datafetchservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: datafetchservice
+  ports:
+  - port: 80
+    targetPort: 8080

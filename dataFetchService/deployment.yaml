@@ -1,0 +1,24 @@
+# This file configures the app which serves public web traffic.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datafetchservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datafetchservice
+  template:
+    metadata:
+      labels:
+        app: datafetchservice
+    spec:
+      containers:
+      - name: datafetchservice-app
+        image: gcr.io/aravind-ramalingam/datafetchservice:latest
+        # This app listens on port 8080 for web traffic by default.
+        ports:
+        - containerPort: 8080
+        env:
+          - name: PORT
+            value: "8080"
