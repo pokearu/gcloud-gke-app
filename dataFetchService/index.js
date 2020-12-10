@@ -9,6 +9,7 @@ const uuidv4 = require('uuid').v4
 const app = express()
 app.use(bodyParser.json())
 app.use(cors())
+app.use(express.static('public'))
 
 
 const port = process.env.PORT || 8080
@@ -55,6 +56,37 @@ let sendDataToEncrypt = (dataString, cryptoKey, blockIndex, jobId) => {
     })
 }
 
+let sendDataToDecrypt = (dataString, cryptoKey) => {
+    return new Promise((resolve, reject) => {
+        let data = {
+            "message": dataString,
+            "key": cryptoKey
+            }
+        let options = {
+            url: "http://cryptoservice/decrypt",
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body : data,
+            json: true
+        }
+        let body = ""
+        request.post(options)
+        .on("data", (data) => {
+            body += data.toString() 
+        })
+        .on("complete", (status) => {
+            console.log("Plaintext data block.")
+            resolve(body)
+            return
+        })
+        .on("error", (error) => {
+            console.error("Data block send error!" + error.message)
+            reject(error.message)
+        })
+    })
+}
+
 app.post('/fetchFromURL', async (req, res) => {
     let ebookUrl = req.body.ebookUrl
     let cryptoKey = req.body.cryptoKey
@@ -73,9 +105,37 @@ app.post('/fetchFromURL', async (req, res) => {
         console.log("eBook encryption complete")
         // Wait for all encryption Jobs to complete
         Promise.all(cipherPromises).then((values) => {
-            res.status(200).send(values.join("\r\n"))
+            res.status(200).json({"cipherText": values.join("\r\n"), "jobId": jobId})
         }).catch((error) => {
             console.error("eBook Encrypt error: "+ error.message)
+            res.status(500).send(error.message)
+        })
+    })
+})
+
+app.post('/fetchFromURLDecrypt', async (req, res) => {
+    let ebookUrl = req.body.ebookUrl
+    let cryptoKey = req.body.cryptoKey
+    let jobId = uuidv4()
+    let plaintextPromises = []
+    let cipherText = ""
+    request.get(ebookUrl).on("data", (data) => {
+        console.log("Got data of size : " + data.length)
+        let dataString = data.toString()
+        cipherText += dataString
+    }).on("error", (error) => {
+        console.error("eBook ciphertext GET error: "+ error.message)
+        res.status(500).send(error.message)
+    }).on("complete", (status) => {
+        let chiperBlocks = cipherText.split("\n")
+        for (let block of chiperBlocks) {
+            plaintextPromises.push(sendDataToDecrypt(block, cryptoKey))
+        }
+        // Wait for all decryption Jobs to complete
+        Promise.all(plaintextPromises).then((values) => {
+            res.status(200).json({"plainText": values.join(""), "jobId": jobId})
+        }).catch((error) => {
+            console.error("eBook Decrypt error: "+ error.message)
             res.status(500).send(error.message)
         })
     })

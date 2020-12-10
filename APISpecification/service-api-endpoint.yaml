@@ -1,0 +1,24 @@
+# service-api.yaml
+swagger: '2.0'
+info:
+  title: service-api
+  description: Service Endpoint that fronts GKE container
+  version: 1.0.0
+host: ebookcrypto.endpoints.aravind-ramalingam.cloud.goog
+x-google-endpoints:
+- name: ebookcrypto.endpoints.aravind-ramalingam.cloud.goog
+  target: "35.238.204.63"
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /:
+    get:
+      summary: Landing page
+      operationId: hello
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
